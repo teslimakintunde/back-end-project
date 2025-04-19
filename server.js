@@ -8,6 +8,7 @@ import { fileURLToPath } from "url";
 import { dirname } from "path";
 import connectDB from "./config/dbConnect.js";
 import serverless from "serverless-http";
+import mongoose from "mongoose";
 
 import router from "./routes/employee.js";
 
