@@ -62,7 +62,6 @@ const connectDB = async () => {
     }
 
     await mongoose.connect(connectionUrl, {
-      useNewUrlParser: true,
       serverSelectionTimeoutMS: 5000,
       bufferCommands: false,
     });

@@ -28,26 +28,30 @@ app.use(express.static(path.join(__dirname, "public")));
 // Routes
 app.use("/employees", router);
 
-// Root route
 app.get("/", (req, res) => {
   res.json({ message: "Welcome to the Employee API" });
 });
-// Health check endpoint
+
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK" });
 });
 
-// Catch-all for 404s
+// Catch-all 404
 app.use((req, res) => {
   console.error(`404: Route not found - ${req.method} ${req.url}`);
   res.status(404).json({ error: "Not Found" });
 });
 
-// MongoDB Connection
+// MongoDB connection management
 let cachedConnection = null;
 
 const connectWithRetry = async () => {
+  // Already connected
+  if (mongoose.connection.readyState === 1) return mongoose.connection;
+
+  // Use cached connection if available
   if (cachedConnection) return cachedConnection;
+
   try {
     cachedConnection = await connectDB();
     return cachedConnection;
@@ -57,10 +61,11 @@ const connectWithRetry = async () => {
   }
 };
 
+// Vercel serverless handler
 const handler = serverless(app);
 
-// Vercel serverless handler
 export default async (req, res) => {
+  console.log(`Incoming request: ${req.method} ${req.url}`);
   try {
     await connectWithRetry();
     return handler(req, res);
