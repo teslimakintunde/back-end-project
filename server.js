@@ -12,6 +12,7 @@ import serverless from "serverless-http";
 import router from "./routes/employee.js";
 
 dotenv.config();
+console.log("MONGODB_URL:", process.env.MONGODB_URL ? "Set" : "Not set");
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -56,7 +57,7 @@ const connectWithRetry = async () => {
     cachedConnection = await connectDB();
     return cachedConnection;
   } catch (err) {
-    console.error("MongoDB connection failed:", err);
+    console.error("MongoDB connection failed:", err.message);
     throw err;
   }
 };
