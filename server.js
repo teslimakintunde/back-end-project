@@ -70,7 +70,7 @@ export default async (req, res) => {
     await connectWithRetry();
     return handler(req, res);
   } catch (err) {
-    console.error("Vercel handler error:", err);
+    console.error("Vercel handler error:", err.message);
     return res.status(500).json({ error: "Database connection failed" });
   }
 };
