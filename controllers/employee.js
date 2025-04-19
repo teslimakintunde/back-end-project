@@ -18,3 +18,11 @@ export const createEmployee = async (req, res) => {
     console.log(error);
   }
 };
+export const getAllEmployee = async (req, res) => {
+  try {
+    const allEmployees = await EmployeeData.find();
+    res.status(201).json(allEmployees);
+  } catch (error) {
+    console.log(error);
+  }
+};
