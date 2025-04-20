@@ -1,4 +1,4 @@
-import allowedOrigin from "../config/allowedOrigins.js";
+const allowedOrigin = require("../config/allowedOrigins");
 
 const credentials = (req, res, next) => {
   const origin = req.headers.origin;
@@ -6,4 +6,4 @@ const credentials = (req, res, next) => {
     res.header("Access-Control-Allow-Credentials", true);
   }
 };
-export default credentials;
+module.exports = credentials;

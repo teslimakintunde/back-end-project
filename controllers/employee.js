@@ -1,6 +1,6 @@
-import EmployeeData from "../models/Employee.js";
+const EmployeeData = require("../models/Employee");
 
-export const createEmployee = async (req, res) => {
+const createEmployee = async (req, res) => {
   const { firstname, lastname } = req.body;
   if (!firstname || !lastname)
     return res.status(400).json({ message: "missing required field" });
@@ -18,7 +18,7 @@ export const createEmployee = async (req, res) => {
     console.log(error);
   }
 };
-export const getAllEmployee = async (req, res) => {
+const getAllEmployee = async (req, res) => {
   try {
     const allEmployees = await EmployeeData.find();
     res.status(201).json(allEmployees);
@@ -26,3 +26,4 @@ export const getAllEmployee = async (req, res) => {
     console.log(error);
   }
 };
+module.exports = { createEmployee, getAllEmployee };

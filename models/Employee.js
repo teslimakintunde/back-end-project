@@ -1,11 +1,8 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const employeeSchema = new mongoose.Schema({
   firstname: String,
   lastname: String,
 });
 
-const EmployeeData =
-  mongoose.models.EmployeeData ||
-  mongoose.model("EmployeeData", employeeSchema);
-export default EmployeeData;
+module.exports = mongoose.model("EmployeeData", employeeSchema);

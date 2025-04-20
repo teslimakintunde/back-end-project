@@ -1,91 +1,83 @@
-import express from "express";
-import path from "path";
-import dotenv from "dotenv";
-import cors from "cors";
-import corsOptions from "./config/corsOptions.js";
-import cookieParser from "cookie-parser";
-import { fileURLToPath } from "url";
-import { dirname } from "path";
-import connectDB from "./config/dbConnect.js";
-import serverless from "serverless-http";
-import mongoose from "mongoose";
+require("dotenv").config();
+const cors = require("cors");
+const corsOptions = require("./config/corsOptions");
+const express = require("express");
+const connectToDB = require("./config/dbConnect");
+const mongoose = require("mongoose");
 
-import router from "./routes/employee.js";
+// connectToDB();
+// const app = express();
 
-dotenv.config();
-console.log("MONGODB_URL:", process.env.MONGODB_URL ? "Set" : "Not set");
+// app.use(cors(corsOptions));
+// //Middlewares
+// app.use(express.json());
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+// const PORT = process.env.PORT || 3000;
+
+// app.use("/employees", require("./routes/employee"));
+// app.get("/", (req, res) => {
+//   res.json({ message: "Welcome to the Employee API" });
+// });
+
+// mongoose.connection.once("open", () => {
+//   console.log("connect to db");
+//   app.listen(PORT, () => console.log(`app running on port ${PORT}`));
+// });
+
+console.log(
+  "Environment variables loaded:",
+  process.env.PORT ? "PORT found" : "PORT missing"
+);
+
+// Verify CORS options
+try {
+  const corsOptions = require("./config/corsOptions");
+  console.log("CORS options loaded successfully");
+} catch (err) {
+  console.error("Failed to load CORS options:", err);
+  process.exit(1);
+}
+
+// Verify DB connection
+try {
+  const connectToDB = require("./config/dbConnect");
+  console.log("DB connection module loaded");
+  connectToDB();
+} catch (err) {
+  console.error("DB connection failed:", err);
+}
 
 const app = express();
 
-// Middleware
 app.use(cors(corsOptions));
-app.use(cookieParser());
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(express.static(path.join(__dirname, "public")));
 
-// Routes
-app.use("/employees", router);
+// Verify routes
+try {
+  const employeeRoutes = require("./routes/employee");
+  app.use("/employees", employeeRoutes);
+  console.log("Employee routes loaded");
+} catch (err) {
+  console.error("Failed to load employee routes:", err);
+}
 
 app.get("/", (req, res) => {
   res.json({ message: "Welcome to the Employee API" });
 });
 
-app.get("/health", (req, res) => {
-  res.status(200).json({ status: "OK" });
+// Database connection events
+mongoose.connection.on("error", (err) => {
+  console.error("MongoDB connection error:", err);
 });
 
-// Catch-all 404
-app.use((req, res) => {
-  console.error(`404: Route not found - ${req.method} ${req.url}`);
-  res.status(404).json({ error: "Not Found" });
+mongoose.connection.once("open", () => {
+  console.log("Connected to DB");
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 });
 
-// MongoDB connection management
-let cachedConnection = null;
-
-const connectWithRetry = async () => {
-  // Already connected
-  if (mongoose.connection.readyState === 1) return mongoose.connection;
-
-  // Use cached connection if available
-  if (cachedConnection) return cachedConnection;
-
-  try {
-    cachedConnection = await connectDB();
-    return cachedConnection;
-  } catch (err) {
-    console.error("MongoDB connection failed:", err.message);
-    throw err;
-  }
-};
-
-// Vercel serverless handler
-const handler = serverless(app);
-
-export default async (req, res) => {
-  console.log(`Incoming request: ${req.method} ${req.url}`);
-  try {
-    await connectWithRetry();
-    return handler(req, res);
-  } catch (err) {
-    console.error("Vercel handler error:", err.message);
-    return res.status(500).json({ error: "Database connection failed" });
-  }
-};
-
-// Local development server
-if (process.env.NODE_ENV !== "production") {
-  const PORT = process.env.PORT || 3500;
-  connectWithRetry()
-    .then(() => {
-      app.listen(PORT, () => console.log(`App running on port ${PORT}`));
-    })
-    .catch((err) => {
-      console.error("Failed to start server:", err);
-      process.exit(1);
-    });
-}
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: "Internal Server Error" });
+});

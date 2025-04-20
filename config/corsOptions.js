@@ -1,4 +1,4 @@
-import allowedOrigin from "./allowedOrigins.js";
+const allowedOrigin = require("./allowedOrigins");
 
 const corsOptions = {
   origin: (origin, callback) => {
@@ -11,13 +11,4 @@ const corsOptions = {
   optionsSuccessStatus: 200,
 };
 
-export default corsOptions;
-// const corsOptions = {
-//   origin: [
-//     "https://back-end-project.vercel.app", // Replace with your Vercel URL
-//     "http://localhost:3500",
-//   ],
-//   methods: ["GET", "POST", "PUT", "DELETE"],
-//   credentials: true,
-// };
-// export default corsOptions;
+module.exports = corsOptions;
